@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/graphql-go/graphql"
-	"github.com/graphql-go/graphql/testutil"
+	"github.com/flynn/graphql"
+	"github.com/flynn/graphql/testutil"
 )
 
 // TODO: have a separate package for other tests for eg `parser`

@@ -3,9 +3,10 @@ package visitor
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/graphql-go/graphql/language/ast"
-	"github.com/graphql-go/graphql/language/typeInfo"
 	"reflect"
+
+	"github.com/flynn/graphql/language/ast"
+	"github.com/flynn/graphql/language/typeInfo"
 )
 
 const (

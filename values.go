@@ -7,11 +7,12 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/graphql-go/graphql/gqlerrors"
-	"github.com/graphql-go/graphql/language/ast"
-	"github.com/graphql-go/graphql/language/kinds"
-	"github.com/graphql-go/graphql/language/printer"
 	"sort"
+
+	"github.com/flynn/graphql/gqlerrors"
+	"github.com/flynn/graphql/language/ast"
+	"github.com/flynn/graphql/language/kinds"
+	"github.com/flynn/graphql/language/printer"
 )
 
 // Prepares an object map of variableValues of the correct type based on the

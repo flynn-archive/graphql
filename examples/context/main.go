@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/graphql-go/graphql"
+	"github.com/flynn/graphql"
 	"golang.org/x/net/context"
 )
 
