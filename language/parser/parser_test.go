@@ -97,7 +97,7 @@ func TestParseProvidesUsefulErrors(t *testing.T) {
     ^
 `,
 		Positions: []int{1},
-		Locations: []location.SourceLocation{{1, 2}},
+		Locations: []location.SourceLocation{{Line: 1, Column: 2}},
 	}
 	checkError(t, err, expectedError)
 
@@ -581,7 +581,7 @@ func TestParseUnexpectedCharacter(t *testing.T) {
 	expectedError := &gqlerrors.Error{
 		Message:   "Syntax Error GraphQL (1:8) Unexpected character \"~\".\n\n1: {t(d:[[~\n          ^\n",
 		Positions: []int{7},
-		Locations: []location.SourceLocation{{1, 8}},
+		Locations: []location.SourceLocation{{Line: 1, Column: 8}},
 	}
 	checkError(t, err, expectedError)
 }
