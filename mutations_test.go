@@ -1,6 +1,7 @@
 package graphql_test
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -30,11 +31,11 @@ func (r *testRoot) ImmediatelyChangeTheNumber(newNumber int) *testNumberHolder {
 func (r *testRoot) PromiseToChangeTheNumber(newNumber int) *testNumberHolder {
 	return r.ImmediatelyChangeTheNumber(newNumber)
 }
-func (r *testRoot) FailToChangeTheNumber(newNumber int) *testNumberHolder {
-	panic("Cannot change the number")
+func (r *testRoot) FailToChangeTheNumber(newNumber int) (*testNumberHolder, error) {
+	return nil, errors.New("Cannot change the number")
 }
-func (r *testRoot) PromiseAndFailToChangeTheNumber(newNumber int) *testNumberHolder {
-	panic("Cannot change the number")
+func (r *testRoot) PromiseAndFailToChangeTheNumber(newNumber int) (*testNumberHolder, error) {
+	return nil, errors.New("Cannot change the number")
 }
 
 // numberHolderType creates a mapping to testNumberHolder
@@ -98,7 +99,7 @@ var mutationsTestSchema, _ = graphql.NewSchema(graphql.SchemaConfig{
 					newNumber := 0
 					obj, _ := p.Source.(*testRoot)
 					newNumber, _ = p.Args["newNumber"].(int)
-					return obj.FailToChangeTheNumber(newNumber), nil
+					return obj.FailToChangeTheNumber(newNumber)
 				},
 			},
 			"promiseAndFailToChangeTheNumber": &graphql.Field{
@@ -112,7 +113,7 @@ var mutationsTestSchema, _ = graphql.NewSchema(graphql.SchemaConfig{
 					newNumber := 0
 					obj, _ := p.Source.(*testRoot)
 					newNumber, _ = p.Args["newNumber"].(int)
-					return obj.PromiseAndFailToChangeTheNumber(newNumber), nil
+					return obj.PromiseAndFailToChangeTheNumber(newNumber)
 				},
 			},
 		},
@@ -201,33 +202,12 @@ func TestMutations_EvaluatesMutationsCorrectlyInThePresenceOfAFailedMutation(t *
     }`
 
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"first": map[string]interface{}{
-				"theNumber": 1,
-			},
-			"second": map[string]interface{}{
-				"theNumber": 2,
-			},
-			"third": nil,
-			"fourth": map[string]interface{}{
-				"theNumber": 4,
-			},
-			"fifth": map[string]interface{}{
-				"theNumber": 5,
-			},
-			"sixth": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: `Cannot change the number`,
 				Locations: []location.SourceLocation{
 					{Line: 8, Column: 7},
-				},
-			},
-			{
-				Message: `Cannot change the number`,
-				Locations: []location.SourceLocation{
-					{Line: 17, Column: 7},
 				},
 			},
 		},

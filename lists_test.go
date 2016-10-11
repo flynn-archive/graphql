@@ -48,7 +48,7 @@ func checkList(t *testing.T, testType graphql.Type, testData interface{}, expect
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(expected.Errors) != len(result.Errors) {
-		t.Fatalf("wrong result, Diff: %v", testutil.Diff(expected.Errors, result.Errors))
+		t.Fatalf("wrong result, Expected: %#v, Got: %#v", expected.Errors, result.Errors)
 	}
 	if !reflect.DeepEqual(expected, result) {
 		t.Fatalf("Unexpected result, Diff: %v", testutil.Diff(expected, result))
@@ -251,9 +251,7 @@ func TestLists_NonNullListOfNullableObjectsContainsNull(t *testing.T) {
 func TestLists_NonNullListOfNullableObjectsReturnsNull(t *testing.T) {
 	ttype := graphql.NewNonNull(graphql.NewList(graphql.Int))
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -321,9 +319,7 @@ func TestLists_NonNullListOfNullableFunc_ReturnsNull(t *testing.T) {
 		return nil
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -415,11 +411,7 @@ func TestLists_NullableListOfNonNullObjects_ContainsNull(t *testing.T) {
 		1, nil, 2,
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": map[string]interface{}{
-				"test": nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -480,11 +472,7 @@ func TestLists_NullableListOfNonNullFunc_ContainsNull(t *testing.T) {
 		}
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": map[string]interface{}{
-				"test": nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -593,9 +581,7 @@ func TestLists_NonNullListOfNonNullObjects_ContainsNull(t *testing.T) {
 		1, nil, 2,
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -614,9 +600,7 @@ func TestLists_NonNullListOfNonNullObjects_ReturnsNull(t *testing.T) {
 	ttype := graphql.NewNonNull(graphql.NewList(graphql.NewNonNull(graphql.Int)))
 
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -665,9 +649,7 @@ func TestLists_NonNullListOfNonNullFunc_ContainsNull(t *testing.T) {
 		}
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -691,9 +673,7 @@ func TestLists_NonNullListOfNonNullFunc_ReturnsNull(t *testing.T) {
 		return nil
 	}
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: "Cannot return null for non-nullable field DataType.test.",
@@ -766,11 +746,7 @@ func TestLists_UserErrorExpectIterableButDidNotGetOne(t *testing.T) {
 	ttype := graphql.NewList(graphql.Int)
 	data := "Not an iterable"
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": map[string]interface{}{
-				"test": nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message:   "User Error: expected iterable, but did not find one for field DataType.test.",

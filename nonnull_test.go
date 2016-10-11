@@ -1,6 +1,7 @@
 package graphql_test
 
 import (
+	"errors"
 	"reflect"
 	"sort"
 	"testing"
@@ -16,18 +17,18 @@ var nonNullSyncError = "nonNullSync"
 var promiseError = "promise"
 var nonNullPromiseError = "nonNullPromise"
 
-var throwingData = map[string]interface{}{
-	"sync": func() interface{} {
-		panic(syncError)
+var erroringData = map[string]interface{}{
+	"sync": func() (interface{}, error) {
+		return nil, errors.New(syncError)
 	},
-	"nonNullSync": func() interface{} {
-		panic(nonNullSyncError)
+	"nonNullSync": func() (interface{}, error) {
+		return nil, errors.New(nonNullSyncError)
 	},
-	"promise": func() interface{} {
-		panic(promiseError)
+	"promise": func() (interface{}, error) {
+		return nil, errors.New(promiseError)
 	},
-	"nonNullPromise": func() interface{} {
-		panic(nonNullPromiseError)
+	"nonNullPromise": func() (interface{}, error) {
+		return nil, errors.New(nonNullPromiseError)
 	},
 }
 
@@ -69,17 +70,17 @@ var nonNullTestSchema, _ = graphql.NewSchema(graphql.SchemaConfig{
 })
 
 func init() {
-	throwingData["nest"] = func() interface{} {
-		return throwingData
+	erroringData["nest"] = func() interface{} {
+		return erroringData
 	}
-	throwingData["nonNullNest"] = func() interface{} {
-		return throwingData
+	erroringData["nonNullNest"] = func() interface{} {
+		return erroringData
 	}
-	throwingData["promiseNest"] = func() interface{} {
-		return throwingData
+	erroringData["promiseNest"] = func() interface{} {
+		return erroringData
 	}
-	throwingData["nonNullPromiseNest"] = func() interface{} {
-		return throwingData
+	erroringData["nonNullPromiseNest"] = func() interface{} {
+		return erroringData
 	}
 
 	nullingData["nest"] = func() interface{} {
@@ -117,9 +118,7 @@ func TestNonNull_NullsANullableFieldThatThrowsSynchronously(t *testing.T) {
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"sync": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: syncError,
@@ -138,7 +137,7 @@ func TestNonNull_NullsANullableFieldThatThrowsSynchronously(t *testing.T) {
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -155,9 +154,7 @@ func TestNonNull_NullsANullableFieldThatThrowsInAPromise(t *testing.T) {
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"promise": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: promiseError,
@@ -176,7 +173,7 @@ func TestNonNull_NullsANullableFieldThatThrowsInAPromise(t *testing.T) {
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -195,9 +192,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANullableFieldThat
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: nonNullSyncError,
@@ -216,7 +211,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANullableFieldThat
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -235,9 +230,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANonNullableFieldT
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: nonNullPromiseError,
@@ -256,7 +249,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANonNullableFieldT
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -275,9 +268,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"promiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: nonNullSyncError,
@@ -296,7 +287,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -315,9 +306,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"promiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: nonNullPromiseError,
@@ -336,7 +325,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -377,103 +366,12 @@ func TestNonNull_NullsAComplexTreeOfNullableFieldsThatThrow(t *testing.T) {
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": map[string]interface{}{
-				"sync":    nil,
-				"promise": nil,
-				"nest": map[string]interface{}{
-					"sync":    nil,
-					"promise": nil,
-				},
-				"promiseNest": map[string]interface{}{
-					"sync":    nil,
-					"promise": nil,
-				},
-			},
-			"promiseNest": map[string]interface{}{
-				"sync":    nil,
-				"promise": nil,
-				"nest": map[string]interface{}{
-					"sync":    nil,
-					"promise": nil,
-				},
-				"promiseNest": map[string]interface{}{
-					"sync":    nil,
-					"promise": nil,
-				},
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 4, Column: 11},
-				},
-			},
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 7, Column: 13},
-				},
-			},
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 11, Column: 13},
-				},
-			},
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 16, Column: 11},
-				},
-			},
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 19, Column: 13},
-				},
-			},
-			{
-				Message: syncError,
-				Locations: []location.SourceLocation{
-					{Line: 23, Column: 13},
-				},
-			},
-			{
-				Message: promiseError,
-				Locations: []location.SourceLocation{
-					{Line: 5, Column: 11},
-				},
-			},
 			{
 				Message: promiseError,
 				Locations: []location.SourceLocation{
 					{Line: 8, Column: 13},
-				},
-			},
-			{
-				Message: promiseError,
-				Locations: []location.SourceLocation{
-					{Line: 12, Column: 13},
-				},
-			},
-			{
-				Message: promiseError,
-				Locations: []location.SourceLocation{
-					{Line: 17, Column: 11},
-				},
-			},
-			{
-				Message: promiseError,
-				Locations: []location.SourceLocation{
-					{Line: 20, Column: 13},
-				},
-			},
-			{
-				Message: promiseError,
-				Locations: []location.SourceLocation{
-					{Line: 24, Column: 13},
 				},
 			},
 		},
@@ -485,7 +383,7 @@ func TestNonNull_NullsAComplexTreeOfNullableFieldsThatThrow(t *testing.T) {
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -550,35 +448,12 @@ func TestNonNull_NullsTheFirstNullableObjectAfterAFieldThrowsInALongChainOfField
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest":               nil,
-			"promiseNest":        nil,
-			"anotherNest":        nil,
-			"anotherPromiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
-			{
-				Message: nonNullSyncError,
-				Locations: []location.SourceLocation{
-					{Line: 8, Column: 19},
-				},
-			},
-			{
-				Message: nonNullSyncError,
-				Locations: []location.SourceLocation{
-					{Line: 19, Column: 19},
-				},
-			},
 			{
 				Message: nonNullPromiseError,
 				Locations: []location.SourceLocation{
 					{Line: 30, Column: 19},
-				},
-			},
-			{
-				Message: nonNullPromiseError,
-				Locations: []location.SourceLocation{
-					{Line: 41, Column: 19},
 				},
 			},
 		},
@@ -590,7 +465,7 @@ func TestNonNull_NullsTheFirstNullableObjectAfterAFieldThrowsInALongChainOfField
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -677,9 +552,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANonNullableFieldT
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: `Cannot return null for non-nullable field DataType.nonNullSync.`,
@@ -715,9 +588,7 @@ func TestNonNull_NullsASynchronouslyReturnedObjectThatContainsANonNullableFieldT
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: `Cannot return null for non-nullable field DataType.nonNullPromise.`,
@@ -754,9 +625,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"promiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: `Cannot return null for non-nullable field DataType.nonNullSync.`,
@@ -792,9 +661,7 @@ func TestNonNull_NullsAnObjectReturnedInAPromiseThatContainsANonNullableFieldTha
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"promiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message: `Cannot return null for non-nullable field DataType.nonNullPromise.`,
@@ -948,35 +815,12 @@ func TestNonNull_NullsTheFirstNullableObjectAfterAFieldReturnsNullInALongChainOf
       }
 	`
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"nest":               nil,
-			"promiseNest":        nil,
-			"anotherNest":        nil,
-			"anotherPromiseNest": nil,
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
-			{
-				Message: `Cannot return null for non-nullable field DataType.nonNullSync.`,
-				Locations: []location.SourceLocation{
-					{Line: 8, Column: 19},
-				},
-			},
-			{
-				Message: `Cannot return null for non-nullable field DataType.nonNullSync.`,
-				Locations: []location.SourceLocation{
-					{Line: 19, Column: 19},
-				},
-			},
 			{
 				Message: `Cannot return null for non-nullable field DataType.nonNullPromise.`,
 				Locations: []location.SourceLocation{
 					{Line: 30, Column: 19},
-				},
-			},
-			{
-				Message: `Cannot return null for non-nullable field DataType.nonNullPromise.`,
-				Locations: []location.SourceLocation{
-					{Line: 41, Column: 19},
 				},
 			},
 		},
@@ -1026,7 +870,7 @@ func TestNonNull_NullsTheTopLevelIfSyncNonNullableFieldThrows(t *testing.T) {
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
@@ -1058,7 +902,7 @@ func TestNonNull_NullsTheTopLevelIfSyncNonNullableFieldErrors(t *testing.T) {
 	ep := graphql.ExecuteParams{
 		Schema: nonNullTestSchema,
 		AST:    ast,
-		Root:   throwingData,
+		Root:   erroringData,
 	}
 	result := testutil.TestExecute(t, ep)
 	if len(result.Errors) != len(expected.Errors) {
