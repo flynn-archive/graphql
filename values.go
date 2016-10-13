@@ -330,7 +330,7 @@ func isNullish(value interface{}) bool {
 	if value, ok := value.(float64); ok {
 		return math.IsNaN(value)
 	}
-	return value == nil
+	return !reflect.Indirect(reflect.ValueOf(value)).IsValid()
 }
 
 /**

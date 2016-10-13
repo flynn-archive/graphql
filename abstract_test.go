@@ -355,19 +355,7 @@ func TestResolveTypeOnInterfaceYieldsUsefulError(t *testing.T) {
     }`
 
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"pets": []interface{}{
-				map[string]interface{}{
-					"name":  "Odie",
-					"woofs": bool(true),
-				},
-				map[string]interface{}{
-					"name":  "Garfield",
-					"meows": bool(false),
-				},
-				nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message:   `Runtime Object type "Human" is not a possible type for "Pet".`,
@@ -473,19 +461,7 @@ func TestResolveTypeOnUnionYieldsUsefulError(t *testing.T) {
     }`
 
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"pets": []interface{}{
-				map[string]interface{}{
-					"name":  "Odie",
-					"woofs": bool(true),
-				},
-				map[string]interface{}{
-					"name":  "Garfield",
-					"meows": bool(false),
-				},
-				nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message:   `Runtime Object type "Human" is not a possible type for "Pet".`,

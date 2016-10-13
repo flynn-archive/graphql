@@ -510,17 +510,11 @@ func TestNullsOutErrorSubtrees(t *testing.T) {
       syncError,
     }`
 
-	expectedData := map[string]interface{}{
-		"sync":      "sync",
-		"syncError": nil,
-	}
 	expectedErrors := []gqlerrors.FormattedError{
 		{
 			Message: "Error getting syncError",
 			Locations: []location.SourceLocation{
-				{
-					Line: 3, Column: 7,
-				},
+				{Line: 3, Column: 7},
 			},
 		},
 	}
@@ -529,8 +523,8 @@ func TestNullsOutErrorSubtrees(t *testing.T) {
 		"sync": func() interface{} {
 			return "sync"
 		},
-		"syncError": func() interface{} {
-			panic("Error getting syncError")
+		"syncError": func() (interface{}, error) {
+			return nil, errors.New("Error getting syncError")
 		},
 	}
 	schema, err := graphql.NewSchema(graphql.SchemaConfig{
@@ -563,11 +557,11 @@ func TestNullsOutErrorSubtrees(t *testing.T) {
 	if len(result.Errors) == 0 {
 		t.Fatalf("wrong result, expected errors, got %v", len(result.Errors))
 	}
-	if !reflect.DeepEqual(expectedData, result.Data) {
-		t.Fatalf("Unexpected result, Diff: %v", testutil.Diff(expectedData, result.Data))
+	if result.Data != nil {
+		t.Fatalf("Unexpected result, Diff: %v", testutil.Diff(nil, result.Data))
 	}
 	if !reflect.DeepEqual(expectedErrors, result.Errors) {
-		t.Fatalf("Unexpected result, Diff: %v", testutil.Diff(expectedErrors, result.Errors))
+		t.Fatalf("Unexpected result, \nActual: %#v\nExpected:%#v\nDiff: %v", result.Errors, expectedErrors, testutil.Diff(expectedErrors, result.Errors))
 	}
 }
 
@@ -1293,14 +1287,7 @@ func TestFailsWhenAnIsTypeOfCheckIsNotMet(t *testing.T) {
 	}
 
 	expected := &graphql.Result{
-		Data: map[string]interface{}{
-			"specials": []interface{}{
-				map[string]interface{}{
-					"value": "foo",
-				},
-				nil,
-			},
-		},
+		Data: nil,
 		Errors: []gqlerrors.FormattedError{
 			{
 				Message:   `Expected value of type "SpecialType" but got: graphql_test.testNotSpecialType.`,
